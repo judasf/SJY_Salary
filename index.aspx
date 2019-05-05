@@ -104,6 +104,7 @@
                     if (roleid == 1)//工资管理员
                     { %>
                   <li class="current"><a href="SalaryTableInfo.aspx" target="mainfrm">工资导入</a></li>
+                 <li><a href="BaseInfo/UserInfo.aspx" target="mainfrm">用户管理</a></li>
                 <%} %>
                 <li class="clearboth"></li>
             </ul>

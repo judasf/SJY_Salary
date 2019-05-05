@@ -24,10 +24,6 @@ public class UserInfo : IHttpHandler, IRequiresSessionState
     /// </summary>
     string thisUserName;
     /// <summary>
-    /// 登录用户部门编号
-    /// </summary>
-    int DeptID;
-    /// <summary>
     /// 登录角色
     /// </summary>
     int RoleID;
@@ -55,7 +51,6 @@ public class UserInfo : IHttpHandler, IRequiresSessionState
         {
             UserDetail ud = new UserDetail();
             thisUserName = ud.LoginUser.UserName;
-            DeptID = ud.LoginUser.DeptId;
             RoleID = ud.LoginUser.RoleId;
         }
         string method = HttpContext.Current.Request.PathInfo.Substring(1);
@@ -87,13 +82,10 @@ public class UserInfo : IHttpHandler, IRequiresSessionState
             list.Add(" userName like'%" + Request.Form["userName"] + "%'");
         if (!string.IsNullOrEmpty(Request.Form["realName"]))
             list.Add(" realName like'%" + Request.Form["realName"] + "%'");
-        if (!string.IsNullOrEmpty(Request.Form["roleId"]))
-            list.Add(" a.roleId =" + Request.Form["roleId"]);
-        if (!string.IsNullOrEmpty(Request.Form["deptId"]))
-            list.Add(" a.deptId =" + Request.Form["deptId"]);
-        //部门管理员只显示本部门人员
-        if (RoleID == 2)
-            list.Add(" a.deptid= " + DeptID.ToString());
+        //if (!string.IsNullOrEmpty(Request.Form["roleId"]))
+        //    list.Add(" a.roleId =" + Request.Form["roleId"]);
+        //if (!string.IsNullOrEmpty(Request.Form["deptId"]))
+        //    list.Add(" a.deptId =" + Request.Form["deptId"]);
         //不显示工资管理员和人事管理员
         list.Add(" a.roleid<>1");
         list.Add(" a.roleid<>3");
@@ -109,8 +101,8 @@ public class UserInfo : IHttpHandler, IRequiresSessionState
     {
         int total = 0;
         string where = SetQueryConditionForUserInfo();
-        string tableName = "empinfo a  left join roleinfo b on a.roleid=b.roleid  left join department c on a.deptid=c.deptid";
-        string fieldStr = "UID,UserName,realname,deptname,RoleName,a.RoleID,c.deptid";
+        string tableName = "empinfo a  left join roleinfo b on a.roleid=b.roleid  ";
+        string fieldStr = "UID,UserName,realname";
         DataSet ds = SqlHelper.GetPagination(tableName, fieldStr, Request.Form["sort"].ToString(), Request.Form["order"].ToString(), where, Convert.ToInt32(Request.Form["rows"]), Convert.ToInt32(Request.Form["page"]), out total);
         Response.Write(JsonConvert.GetJsonFromDataTable(ds, total));
     }
@@ -129,7 +121,7 @@ public class UserInfo : IHttpHandler, IRequiresSessionState
         int uid = Convert.ToInt32(Request.Form["UID"]);
         SqlParameter paras = new SqlParameter("@id", SqlDbType.Int);
         paras.Value = uid;
-        string sql = "SELECT UID,UserName,realname,deptname,RoleName,a.RoleID,c.deptid FROM empinfo a  left join roleinfo b on a.roleid=b.roleid  left join department c on a.deptid=c.deptid WHERE UID=@id";
+        string sql = "SELECT UID,UserName,realname FROM empinfo  WHERE UID=@id";
         DataSet ds = SqlHelper.ExecuteDataset(SqlHelper.GetConnection(), CommandType.Text, sql, paras);
         Response.Write(JsonConvert.GetJsonFromDataTable(ds));
     }
@@ -140,41 +132,24 @@ public class UserInfo : IHttpHandler, IRequiresSessionState
     {
         string userName = Convert.ToString(Request.Form["userName"]);
         string realName = Convert.ToString(Request.Form["realName"]);
-        int roleId = Convert.ToInt32(Request.Form["roleId"]);
-        int deptId = Convert.ToInt32(Request.Form["deptId"]);
+        if (userName.Length < 6)
+        {
+            Response.Write("{\"success\":false,\"msg\":\"身份证号不正确！\"}");
+            return;
+        }
         //string userPwd = System.Web.Security.FormsAuthentication.HashPasswordForStoringInConfigFile("888888", "MD5");
-        string userPwd = "123456";
+        string userPwd = userName.Substring(userName.Length - 6);
         SqlParameter[] paras = new SqlParameter[] {
             new SqlParameter("@userName",SqlDbType.NVarChar),
-            new SqlParameter("@roleId",SqlDbType.Int),
-            new SqlParameter("@deptId",SqlDbType.Int),
             new SqlParameter("@userPwd",SqlDbType.NVarChar),
             new SqlParameter("@realName",SqlDbType.NVarChar)
         };
         paras[0].Value = userName;
-        paras[1].Value = roleId;
-        paras[2].Value = deptId;
-        paras[3].Value = userPwd;
-        paras[4].Value = realName;
+        paras[1].Value = userPwd;
+        paras[2].Value = realName;
         //判断身份证号是否存在
         StringBuilder sql = new StringBuilder("if not exists(select * from empinfo where username=@userName)");
-        sql.Append(" INSERT INTO empinfo values(@userName,@userPwd,@realName,@roleId,@deptId); ");
-        /*
-        StringBuilder sql = new StringBuilder("if not exists(select * from userinfo where username=@userName)");
-        sql.Append(" begin ");
-        sql.Append(" if not exists(select * from empinfo where username=@username) ");
-        sql.Append(" begin ");
-        //登录表信息不存在，新增登录信息和用户信息
-        sql.Append(" INSERT INTO UserInfo VALUES(@userName,@realName,@deptId,@roleId); ");
-        sql.Append(" INSERT INTO empinfo values(@userName,@userPwd,@roleId); ");
-        sql.Append(" end  else  begin ");
-        //登录表信息存在，更新登录信息和新增用户信息
-        sql.Append(" INSERT INTO UserInfo VALUES(@userName,@realName,@deptId,@roleId); ");
-        sql.Append("  Update empinfo set roleid=@roleId where username = @userName ");
-        sql.Append(" end ");
-
-        sql.Append(" end ");
-        */
+        sql.Append(" INSERT INTO empinfo(userName,userPwd,realName) values(@userName,@userPwd,@realName); ");
         int result = SqlHelper.ExecuteNonQuery(SqlHelper.GetConnection(), CommandType.Text, sql.ToString(), paras);
         if (result == 1)
             Response.Write("{\"success\":true,\"msg\":\"执行成功\"}");
@@ -189,22 +164,16 @@ public class UserInfo : IHttpHandler, IRequiresSessionState
         int uid = Convert.ToInt32(Request.Form["uid"]);
         string userName = Convert.ToString(Request.Form["userName"]);
         string realName = Convert.ToString(Request.Form["realName"]);
-        int roleId = Convert.ToInt32(Request.Form["roleId"]);
-        int deptId = Convert.ToInt32(Request.Form["deptId"]);
         SqlParameter[] paras = new SqlParameter[] {
             new SqlParameter("@uid",SqlDbType.Int),
             new SqlParameter("@userName",SqlDbType.NVarChar),
             new SqlParameter("@realName",SqlDbType.NVarChar),
-            new SqlParameter("@roleId",SqlDbType.Int),
-            new SqlParameter("@deptId",SqlDbType.Int)
         };
         paras[0].Value = uid;
         paras[1].Value = userName;
         paras[2].Value = realName;
-        paras[3].Value = roleId;
-        paras[4].Value = deptId;
 
-        string sql = "UPDATE empinfo set roleid=@roleId,deptid=@deptId,realname=@realName  where username=@userName;";
+        string sql = "UPDATE empinfo set realname=@realName  where username=@userName;";
         int result = SqlHelper.ExecuteNonQuery(SqlHelper.GetConnection(), CommandType.Text, sql, paras);
         if (result == 1)
             Response.Write("{\"success\":true,\"msg\":\"执行成功\"}");
@@ -235,15 +204,11 @@ public class UserInfo : IHttpHandler, IRequiresSessionState
     {
         int uid = 0;
         int.TryParse(Request.Form["uid"], out uid);
-        string userPwd = "123456";
-        //string userPwd = System.Web.Security.FormsAuthentication.HashPasswordForStoringInConfigFile("888888", "MD5");
         SqlParameter[] paras = new SqlParameter[]{
-            new SqlParameter("@id", SqlDbType.Int),
-            new SqlParameter("@userPwd", SqlDbType.VarChar)
+            new SqlParameter("@id", SqlDbType.Int)
         };
         paras[0].Value = uid;
-        paras[1].Value = userPwd;
-        string sql = "update empinfo set UserPwd=@userPwd WHERE uid=@id";
+        string sql = "update empinfo set UserPwd=right(username,6) WHERE uid=@id";
         int result = SqlHelper.ExecuteNonQuery(SqlHelper.GetConnection(), CommandType.Text, sql, paras);
         if (result == 1)
             Response.Write("{\"success\":true,\"msg\":\"执行成功\"}");
@@ -306,81 +271,5 @@ public class UserInfo : IHttpHandler, IRequiresSessionState
         MyXls.CreateXls(dt, "用户信息表.xls", "");
         Response.Flush();
         Response.End();
-    }
-    /// <summary>
-    /// 批量设置人员部门
-    /// </summary>
-    public void SetUserDepartment()
-    {
-        string ids = Convert.ToString(Request.Form["ids"]);
-        string deptid = Convert.ToString(Request.Form["deptId"]);
-        if (ids.Length == 0)
-        {
-            Response.Write("{\"success\":false,\"msg\":\"未选择人员！\"}");
-            return;
-        }
-        string[] arrId = ids.Split(new char[] { ',' });
-        StringBuilder sql = new StringBuilder();
-        List<SqlParameter> paras = new List<SqlParameter>();
-        paras.Add(new SqlParameter("@deptid", deptid));
-        int i = 0;
-        foreach (string id in arrId)
-        {
-            paras.Add(new SqlParameter("@id" + i.ToString(), id));
-            sql.Append("Update  empinfo set deptid=@deptid WHERE uid=@id" + i.ToString() + ";");
-            i++;
-        }
-        //使用事务提交操作
-        using (SqlConnection conn = SqlHelper.GetConnection())
-        {
-            conn.Open();
-            using (SqlTransaction trans = conn.BeginTransaction())
-            {
-                try
-                {
-                    SqlHelper.ExecuteNonQuery(trans, CommandType.Text, sql.ToString(), paras.ToArray());
-                    trans.Commit();
-                    Response.Write("{\"success\":true,\"msg\":\"执行成功\"}");
-                }
-                catch
-                {
-                    trans.Rollback();
-                    Response.Write("{\"success\":false,\"msg\":\"执行出错\"}");
-                    throw;
-                }
-            }
-        }
-    }
-    /// <summary>
-    /// 人事调动
-    /// </summary>
-    public void UserTransfer()
-    {
-        string userName = Convert.ToString(Request.Form["userName"]);
-        string realName = Convert.ToString(Request.Form["realName"]);
-        string deptName = Convert.ToString(Request.Form["deptName"]);
-        int deptId = Convert.ToInt32(Request.Form["deptId"]);
-        SqlParameter[] paras = new SqlParameter[] {
-            new SqlParameter("@userName",SqlDbType.NVarChar),
-            new SqlParameter("@deptId",SqlDbType.Int),
-            new SqlParameter("@realName",SqlDbType.NVarChar),
-            new SqlParameter("@deptName",SqlDbType.NVarChar),
-            new SqlParameter("@applyDate",SqlDbType.NVarChar),
-            new SqlParameter("@applyUser",SqlDbType.NVarChar),
-        };
-        paras[0].Value = userName;
-        paras[1].Value = deptId;
-        paras[2].Value = realName;
-        paras[3].Value = deptName;
-        paras[4].Value = DateTime.Now.ToString("yyyy-MM-dd");
-        //获得登录用户姓名
-        paras[5].Value = SqlHelper.ExecuteScalar(SqlHelper.GetConnection(), CommandType.Text, "Select realname from empinfo where username=@username", new SqlParameter("@username", thisUserName)).ToString();
-
-        string sql = " INSERT INTO UserTransfer values(@applyDate,@userName,@realName,@deptName,@deptId,@applyUser,0)";
-        int result = SqlHelper.ExecuteNonQuery(SqlHelper.GetConnection(), CommandType.Text, sql.ToString(), paras);
-        if (result == 1)
-            Response.Write("{\"success\":true,\"msg\":\"执行成功\"}");
-        else
-            Response.Write("{\"success\":false,\"msg\":\"执行失败！\"}");
     }
 }

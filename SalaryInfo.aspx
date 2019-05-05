@@ -79,8 +79,8 @@
                 singleSelect: false,//单行选取
                 pagination: true, //显示分页
                 pageSize: 20,
-                idField: '身份证号码',
-                sortName: '身份证号码',
+                idField: '身份证',
+                sortName: '身份证',
                 sortOrder: 'desc',
                 columns: [[]]
             });

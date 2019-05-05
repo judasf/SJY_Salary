@@ -73,9 +73,6 @@ public class CommonDB : IHttpHandler, IRequiresSessionState
             user.UID = Convert.ToInt32(row["uid"]);
             user.UserName = Convert.ToString(row["username"]);
             user.RoleId = Convert.ToInt32(row["RoleId"]);
-            int deptid=0;
-            int.TryParse(row["deptid"].ToString(),out deptid);
-            user.DeptId = deptid;
             //user.RoleName = Convert.ToString(row["RoleName"]);
             // 1. 把需要保存的用户数据转成一个字符串。
             //josn格式序列化UserInfo类

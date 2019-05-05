@@ -27,15 +27,6 @@ public class UserInfo
         get { return _userName; }
         set { _userName = value; }
     }
-    private int _deptId;
-    /// <summary>
-    /// 部门名称
-    /// </summary>
-    public int DeptId
-    {
-        get { return _deptId; }
-        set { _deptId = value; }
-    }
     private int _roleId;
     /// <summary>
     /// 用户角色编号，对应用户权限信息

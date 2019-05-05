@@ -37,7 +37,7 @@
             var dialog = parent.$.modalDialog({
                 title: '添加用户',
                 width: 340,
-                height: 300,
+                height: 160,
                 iconCls: 'ext-icon-note_add',
                 href: 'baseinfo/dialogop/UserInfo_op.aspx', //将对话框内容添加到父页面index
                 buttons: [{
@@ -59,7 +59,7 @@
             var dialog = parent.$.modalDialog({
                 title: '编辑用户',
                 width: 340,
-                height: 300,
+                height: 160,
                 iconCls: 'icon-edit',
                 href: 'baseinfo/dialogop/UserInfo_op.aspx?uid=' + id,
                 buttons: [{
@@ -101,38 +101,6 @@
                 }
             });
         };
-        //批量设置部门
-        var setDept = function () {
-            var rows = grid.datagrid('getSelections');
-            var ids = [];
-            if (rows.length == 0) {
-                parent.$.messager.alert('提示', '请选择人员', 'error');
-                return false;
-            }
-            for (var i = 0; i < rows.length; i++) {
-                var row = rows[i];
-                ids.push(row.uid);
-            }
-            var dialog = parent.$.modalDialog({
-                title: '设置部门',
-                width: 340,
-                height: 150,
-                iconCls: 'icon-edit',
-                href: 'baseinfo/dialogop/DeptSet_OP.aspx?ids=' + ids.join(','),
-                buttons: [{
-                    text: '保存',
-                    handler: function () {
-                        parent.onDeptSetFormSubmit(dialog, grid);
-                    }
-                },
-                {
-                    text: '取消',
-                    handler: function () {
-                        dialog.dialog('close');
-                    }
-                }]
-            });
-        };
         $(function () {
             grid = $('#grid').datagrid({
                 title: '用户管理',
@@ -141,15 +109,11 @@
                 rownumbers: true,
                 pagination: true,
                 pageSize: 20,
-                singleSelect: false,
+                singleSelect: true,
                 noheader: true,
                 idField: 'uid',
                 sortName: 'uid',
                 sortOrder: 'desc',
-                frozenColumns: [[{
-                    field: 'ck',
-                    checkbox: true
-                }]],
                 columns: [[{
                     width: '180',
                     title: '身份证号',
@@ -163,20 +127,6 @@
                     field: 'realname',
                     halign: 'center',
                     align: 'center'
-                }, {
-                    width: '120',
-                    title: '部门名称',
-                    field: 'deptname',
-                    sortable: true,
-                    halign: 'center',
-                    align: 'center'
-                }, {
-                    width: '100',
-                    title: '角色名',
-                    field: 'rolename',
-                    halign: 'center',
-                    align: 'center'
-
                 }, {
                     title: '操作',
                     field: 'action',
@@ -212,7 +162,7 @@
 
             });
             //非管理员隐藏操作列
-            if (roleid != 3)
+            if (roleid != 1)
                 $('#grid').datagrid('hideColumn', 'action');
         });
     </script>
@@ -236,9 +186,8 @@
                                 <td>
                                     <input name="realName" class="combo" style="width: 80px;" />
                                 </td>
-                                <td style="width: 80px; text-align: right;">部门名称：
+                              <%--  <td style="width: 80px; text-align: right;">部门名称：
                                 </td>
-                                <td>
                                 <td class="tdinput">
                                     <input id="deptId" type="text" name="deptId" style="width: 100px;"class="easyui-combobox combo" data-options="required:true,valueField:'id',textField:'text',editable:false,panelHeight:'160',url:'../service/Department.ashx/GetAllDeptsCombobox'" />
                                 </td>
@@ -246,7 +195,7 @@
                                 </td>
                                 <td>
                                     <input name="roleId" style="width: 100px;" class="easyui-combobox" data-options="valueField:'id',textField:'text',editable:false, panelWidth: 100,panelHeight:'auto',url:'../service/RoleInfo.ashx/GetAllRoleInfoCombobox'" />
-                                </td>
+                                </td>--%>
                                 <td>
                                     <a href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'ext-icon-search',plain:true"
                                         onclick="grid.datagrid('load',$.serializeObject($('#searchForm')));">查询</a><a href="javascript:void(0);"
@@ -259,7 +208,7 @@
                     </form>
                 </td>
             </tr>
-            <%if (roleid == 3)//人事管理员
+            <%if (roleid == 1)//人事管理员
                 { %>
             <tr>
                 <td>
@@ -269,10 +218,10 @@
                                 <a href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'ext-icon-note_add',plain:true"
                                     onclick="addFun();">添加用户</a>
                             </td>
-                            <td>
+                           <%-- <td>
                                 <a href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'ext-icon-group',plain:true"
                                     onclick="setDept();">批量设置部门</a>
-                            </td>
+                            </td>--%>
                         </tr>
                     </table>
                 </td>
