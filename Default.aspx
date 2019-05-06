@@ -52,13 +52,13 @@
 <body style="margin: 0; padding: 0; background-color: #417bc9;">
     <form id="form1">
         <div style="text-align: center; padding: 140px; margin: 20px; border: 1px solid #417bc9; background-color: #417bc9; height: 300px;">
-            <div class="STYLE7 STYLE8" style="text-align: center; top: 0px; height: 100px;">
-                <span style="font-size: 50px">工资查询系统</span>
+            <div class="STYLE7 STYLE8" style="text-align: center; top: 0px; height: 50px;">
+                工资查询
             </div>
             <div style="width: 432px; margin: 0 auto;">
                 <table width="432" border="0" cellspacing="0" cellpadding="0">
                     <tr>
-                        <th height="26" colspan="2" background="images/Login_Top.gif" class="STYLE6" scope="col">系统登陆</th>
+                        <th height="26" colspan="2" background="images/Login_Top.gif" class="STYLE6" scope="col"></th>
                     </tr>
                     <tr>
                         <td bgcolor="#C4D0E1">

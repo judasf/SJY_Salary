@@ -88,23 +88,11 @@
                 <%if (roleid == 0)//员工
                     { %>
                 <li class="current"><a href="SalaryInfo.aspx" target="mainfrm">工资查询</a></li>
-                <%} %>
-                <%if (roleid == 3)//人事管理员
-                    { %>
-                <li class="current"><a href="BaseInfo/UserInfo.aspx" target="mainfrm">用户管理</a></li>
-                <li><a href="BaseInfo/Department.aspx" target="mainfrm">部门管理</a></li>
-                <li><a href="BaseInfo/UserTransfer.aspx" target="mainfrm">人事调动</a></li>
-                <%} %>
-                <%if (roleid == 2)//部门管理员
-                    { %>
-                <li class="current"><a href="DeptMana/Dept_SalaryInfo.aspx" target="mainfrm">部门工资</a></li>
-                <li><a href="DeptMana/Dept_UserInfo.aspx" target="mainfrm">部门人员</a></li>
-                <li><a href="BaseInfo/UserTransfer.aspx" target="mainfrm">人事调动</a></li>
                 <%}
                     if (roleid == 1)//工资管理员
                     { %>
-                  <li class="current"><a href="SalaryTableInfo.aspx" target="mainfrm">工资导入</a></li>
-                 <li><a href="BaseInfo/UserInfo.aspx" target="mainfrm">用户管理</a></li>
+                <li class="current"><a href="SalaryTableInfo.aspx" target="mainfrm">工资导入</a></li>
+                <li><a href="BaseInfo/UserInfo.aspx" target="mainfrm">用户管理</a></li>
                 <%} %>
                 <li class="clearboth"></li>
             </ul>
@@ -114,21 +102,14 @@
         <div class="clearboth"></div>
     </div>
     <div data-options="region:'center',fit:true,border:false">
-        <%if (roleid == 3)//人事管理
+
+        <%if (roleid == 0)//员工
             { %>
-        <iframe name="mainfrm" src="BaseInfo/UserInfo.aspx" frameborder="0" style="border: 0; width: 100%; height: 88%;"></iframe>
-        <%}
-    else if (roleid == 0)//员工
-    { %>
         <iframe name="mainfrm" src="SalaryInfo.aspx" frameborder="0" style="border: 0; width: 100%; height: 88%;"></iframe>
         <%}
-    else if (roleid == 2)//部门管理员
-    { %>
-          <iframe name="mainfrm" src="DeptMana/Dept_SalaryInfo.aspx" frameborder="0" style="border: 0; width: 100%; height: 88%;"></iframe>
-        <%}
-    else if (roleid == 1)//工资管理员
-    { %>
-         <iframe name="mainfrm" src="SalaryTableInfo.aspx" frameborder="0" style="border: 0; width: 100%; height: 88%;"></iframe>
+            else if (roleid == 1)//工资管理员
+            { %>
+        <iframe name="mainfrm" src="SalaryTableInfo.aspx" frameborder="0" style="border: 0; width: 100%; height: 88%;"></iframe>
         <%} %>
     </div>
     <script>
